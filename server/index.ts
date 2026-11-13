@@ -9,6 +9,7 @@ import { logger } from './logger.js';
 import { errorHandler, type ErrorCode } from './errors.js';
 import { saveMessage, getSessionMessages } from './memory.js';
 import { PROMPT_VERSION, runChatAgentStream } from './agent.js';
+import { seedSampleHistory } from './seed.js';
 
 declare global {
   namespace Express {
@@ -43,6 +44,20 @@ app.get('/api/health', (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+});
+
+// Seed sample history endpoint
+app.post('/api/seed', (req, res, next) => {
+  try {
+    const sessionId =
+      (req.body?.sessionId as string) ||
+      (req.query?.sessionId as string) ||
+      'default';
+    const result = seedSampleHistory(sessionId);
+    res.json(result);
+  } catch (err) {
+    next(err);
   }
 });
 
@@ -88,7 +103,7 @@ app.post('/api/chat', async (req, res, next) => {
 
     // Phase 2 (Active SSE Stream)
     const reqAbortController = new AbortController();
-    res.on('close', () => {
+    req.on('close', () => {
       if (!res.writableEnded) {
         reqAbortController.abort();
       }
