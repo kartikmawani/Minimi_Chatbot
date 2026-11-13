@@ -5,6 +5,7 @@ import { getSessionMessages } from '../server/memory.js';
 import { server } from '../server/index.js';
 
 afterAll(() => {
+  db.prepare("DELETE FROM messages WHERE session_id LIKE 'test-%'").run();
   if (server) {
     server.close();
   }

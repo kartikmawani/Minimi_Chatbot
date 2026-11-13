@@ -1,5 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { db } from '../server/db.js';
+
+afterAll(() => {
+  db.prepare("DELETE FROM messages WHERE session_id LIKE 'test-%'").run();
+});
 import {
   formatHumanDate,
   saveMessage,
