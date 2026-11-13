@@ -200,6 +200,7 @@ export function App() {
                   );
                 } else if (parsed.type === 'done') {
                   setStreamingStatus(null);
+                  setStreamingUserMessage(null);
                   queryClient.invalidateQueries({ queryKey: ['messages'] });
                 }
               } catch (parseErr) {
@@ -216,9 +217,9 @@ export function App() {
         setErrorAlert(err.message || 'An error occurred during communication.');
       }
     } finally {
+      setStreamingUserMessage(null);
       queryClient.invalidateQueries({ queryKey: ['messages'] });
       setIsStreaming(false);
-      setStreamingUserMessage(null);
       setStreamingAssistantText('');
       setStreamingStatus(null);
       setStreamingSources([]);
@@ -366,15 +367,19 @@ export function App() {
         })}
 
         {/* Active Streaming User Bubble */}
-        {isStreaming && streamingUserMessage && (
-          <div className="message-card user">
-            <div className="message-header">
-              <span className="role-badge user">User</span>
-              <span className="timestamp-badge">Just now</span>
+        {isStreaming &&
+          streamingUserMessage &&
+          !messages.some(
+            (m) => m.role === 'user' && m.content === streamingUserMessage
+          ) && (
+            <div className="message-card user">
+              <div className="message-header">
+                <span className="role-badge user">User</span>
+                <span className="timestamp-badge">Just now</span>
+              </div>
+              <div className="message-body">{streamingUserMessage}</div>
             </div>
-            <div className="message-body">{streamingUserMessage}</div>
-          </div>
-        )}
+          )}
 
         {/* Active Streaming Assistant Bubble */}
         {isStreaming && (

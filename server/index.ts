@@ -102,23 +102,12 @@ app.post('/api/chat', async (req, res, next) => {
     res.flushHeaders();
 
     // Phase 2 (Active SSE Stream)
-    const reqAbortController = new AbortController();
-    req.on('close', () => {
-      if (!res.writableEnded) {
-        reqAbortController.abort();
-      }
-    });
-
     const timeoutSignal = AbortSignal.timeout(25000);
-    const combinedSignal = AbortSignal.any([
-      reqAbortController.signal,
-      timeoutSignal,
-    ]);
 
     const result = await runChatAgentStream({
       userMessage: message,
       sessionId,
-      abortSignal: combinedSignal,
+      abortSignal: timeoutSignal,
     });
 
     let fullAssistantReply = '';
